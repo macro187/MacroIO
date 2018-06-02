@@ -76,5 +76,31 @@ DetectLineEndings(TextReader text)
 }
 
 
+/// <summary>
+/// Determine whether there is a UTF-8 BOM sequence at the beginning of a file
+/// </summary>
+///
+public static bool
+StartsWithUtf8Bom(string path)
+{
+    Guard.Required(path, nameof(path));
+    using (var stream = File.OpenRead(path)) return StartsWithUtf8Bom(stream);
+}
+
+
+/// <summary>
+/// Determine whether there is a UTF-8 BOM sequence at the beginning of a stream
+/// </summary>
+///
+public static bool
+StartsWithUtf8Bom(Stream stream)
+{
+    Guard.NotNull(stream, nameof(stream));
+    var bytes = new byte[3];
+    stream.Read(bytes, 0, 3);
+    return bytes[0] == '\xEF' && bytes[1] == '\xBB' && bytes[2] == '\xBF';
+}
+
+
 }
 }
