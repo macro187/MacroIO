@@ -39,7 +39,9 @@ DetectLineEndings_null_throws_ArgumentNullException()
 }
 
 
-[TestMethod] public void DetectLineEndings_no_line_endings_returns_null()
+[TestMethod]
+public void
+DetectLineEndings_no_line_endings_returns_null()
 {
     DetectLineEndings(null, NoLineEndings);
 }
