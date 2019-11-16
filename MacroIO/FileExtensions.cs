@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using MacroGuards;
 using MacroSystem;
@@ -13,6 +14,39 @@ MacroIO
 public static class
 FileExtensions
 {
+
+
+/// <summary>
+/// Append lines of text to a file
+/// </summary>
+///
+/// <remarks>
+/// <para>
+/// If the file already exists, its existing line ending and BOM conventions take precedence.  Otherwise, native line
+/// endings are used and no UTF-8 bom is written.
+/// </para>
+/// <para>
+/// Line ending character sequences within individual <paramref name="lines"/> are normalised to be consistent with the
+/// rest of the file.
+/// </para>
+/// </remarks>
+///
+/// <exception cref="ArgumentNullException">
+/// <paramref name="path"/> is <c>null</c>
+/// - OR -
+/// <paramref name="lines"/> is <c>null</c>
+/// </exception>
+///
+/// <exception cref="ArgumentException">
+/// <paramref name="path"/> is empty or whitespace-only
+/// </exception>
+///
+public static void
+AppendLines(string path, params string[] lines)
+{
+    var existingLines = File.ReadAllLines(path);
+    RewriteAllLines(path, existingLines.Concat(lines));
+}
 
 
 /// <summary>
