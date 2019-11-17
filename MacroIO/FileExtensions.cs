@@ -91,17 +91,12 @@ RewriteAllLines(string path, IEnumerable<string> lines)
 
 
 /// <summary>
-/// Create or replace a text file with specified lines of text
+/// Create or replace a text file with specified lines of text, respecting existing line ending and BOM conventions
 /// </summary>
 ///
 /// <remarks>
-/// <para>
-/// If the file already exists, its existing line ending and BOM conventions take precedence.
-/// </para>
-/// <para>
 /// Line ending character sequences within individual <paramref name="lines"/> are normalised to be consistent with the
 /// rest of the file.
-/// </para>
 /// </remarks>
 ///
 /// <exception cref="ArgumentNullException">
@@ -119,12 +114,43 @@ RewriteAllLines(string path, IEnumerable<string> lines, LineEnding lineEnding, b
 {
     Guard.Required(path, nameof(path));
     Guard.NotNull(lines, nameof(lines));
+    Guard.NotNull(lineEnding, nameof(lineEnding));
 
     if (File.Exists(path))
     {
         lineEnding = DetectLineEndings(path) ?? lineEnding;
         withBom = DetectUtf8Bom(path) ?? withBom;
     }
+
+    WriteAllLines(path, lines, lineEnding, withBom);
+}
+
+
+/// <summary>
+/// Create or replace a text file with specified lines of text
+/// </summary>
+///
+/// <remarks>
+/// Line ending character sequences within individual <paramref name="lines"/> are normalised to be consistent with the
+/// rest of the file.
+/// </remarks>
+///
+/// <exception cref="ArgumentNullException">
+/// <paramref name="path"/> is <c>null</c>
+/// - OR -
+/// <paramref name="lines"/> is <c>null</c>
+/// </exception>
+///
+/// <exception cref="ArgumentException">
+/// <paramref name="path"/> is empty or whitespace-only
+/// </exception>
+///
+public static void
+WriteAllLines(string path, IEnumerable<string> lines, LineEnding lineEnding, bool withBom)
+{
+    Guard.Required(path, nameof(path));
+    Guard.NotNull(lines, nameof(lines));
+    Guard.NotNull(lineEnding, nameof(lineEnding));
 
     var encoding = new UTF8Encoding(withBom);
 
