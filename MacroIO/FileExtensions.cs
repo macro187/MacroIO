@@ -17,6 +17,14 @@ FileExtensions
 
 
 /// <summary>
+/// Sequence of bytes comprising the UTF-8 byte order mark
+/// </summary>
+///
+public static readonly IReadOnlyList<byte>
+Utf8Bom = new[] { (byte)0xEF, (byte)0xBB, (byte)0xBF };
+
+
+/// <summary>
 /// Append lines of text to a file
 /// </summary>
 ///
@@ -208,9 +216,13 @@ public static bool
 StartsWithUtf8Bom(Stream stream)
 {
     Guard.NotNull(stream, nameof(stream));
-    var bytes = new byte[3];
-    stream.Read(bytes, 0, 3);
-    return bytes[0] == '\xEF' && bytes[1] == '\xBB' && bytes[2] == '\xBF';
+
+    var bytes = new byte[Utf8Bom.Count];
+    var bytesRead = stream.Read(bytes, 0, Utf8Bom.Count);
+
+    return
+        bytesRead == Utf8Bom.Count &&
+        bytes.SequenceEqual(Utf8Bom);
 }
 
 
