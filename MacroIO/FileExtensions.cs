@@ -122,7 +122,7 @@ RewriteAllLines(string path, IEnumerable<string> lines, LineEnding lineEnding, b
     if (File.Exists(path))
     {
         lineEnding = DetectLineEndings(path) ?? lineEnding;
-        withBom = StartsWithUtf8Bom(path);
+        withBom = DetectUtf8Bom(path) ?? withBom;
     }
 
     var encoding = new UTF8Encoding(withBom);
@@ -197,32 +197,51 @@ DetectLineEndings(TextReader text)
 
 
 /// <summary>
-/// Determine whether there is a UTF-8 BOM sequence at the beginning of a file
+/// Determine whether a file begins with a UTF-8 BOM sequence
 /// </summary>
 ///
-public static bool
-StartsWithUtf8Bom(string path)
+/// <returns>
+/// <c>true</c> if the bytes at the beginning of the file are a UTF-8 BOM
+/// - OR -
+/// <c>false</c> if the bytes at the beginning of the file are not a UTF-8 BOM
+/// - OR -
+/// <c>null</c> if unsure because the file is empty
+/// </returns>
+///
+public static bool?
+DetectUtf8Bom(string path)
 {
     Guard.Required(path, nameof(path));
-    using (var stream = File.OpenRead(path)) return StartsWithUtf8Bom(stream);
+    using (var stream = File.OpenRead(path)) return DetectUtf8Bom(stream);
 }
 
 
 /// <summary>
-/// Determine whether there is a UTF-8 BOM sequence at the beginning of a stream
+/// Determine whether there is a UTF-8 BOM byte sequence at the current position in a stream
 /// </summary>
 ///
-public static bool
-StartsWithUtf8Bom(Stream stream)
+/// <returns>
+/// <c>true</c> if the bytes at the current position in the <paramref name="stream"/> are a UTF-8 BOM
+/// - OR -
+/// <c>false</c> if the bytes at the current position in the <paramref name="stream"/> are not a UTF-8 BOM
+/// - OR -
+/// <c>null</c> if unsure because there are no bytes left in the <paramref name="stream"/>
+/// </returns>
+///
+public static bool?
+DetectUtf8Bom(Stream stream)
 {
     Guard.NotNull(stream, nameof(stream));
 
     var bytes = new byte[Utf8Bom.Count];
     var bytesRead = stream.Read(bytes, 0, Utf8Bom.Count);
 
-    return
-        bytesRead == Utf8Bom.Count &&
-        bytes.SequenceEqual(Utf8Bom);
+    if (bytesRead == 0)
+    {
+        return null;
+    }
+
+    return bytes.SequenceEqual(Utf8Bom);
 }
 
 
