@@ -173,7 +173,7 @@ RemoveFirst(string path, int count)
 
 
 /// <summary>
-/// Detect the kind of line endings in a text file
+/// Detect the first kind of line ending in a text file
 /// </summary>
 ///
 /// <returns>
@@ -188,7 +188,7 @@ RemoveFirst(string path, int count)
 /// <paramref name="path"/> is <c>null</c>
 /// </exception>
 ///
-/// <exception cref="Argument">
+/// <exception cref="ArgumentException">
 /// <paramref name="path"/> is empty or whitespace-only
 /// </exception>
 ///
@@ -202,7 +202,7 @@ DetectLineEndings(string path)
 
 
 /// <summary>
-/// Detect the kind of line endings in a stream of text
+/// Detect the first kind of line ending in a stream of text
 /// </summary>
 ///
 /// <returns>
@@ -232,6 +232,76 @@ DetectLineEndings(TextReader text)
     }
 
     return null;
+}
+
+
+/// <summary>
+/// Detect all line endings present in a text file
+/// </summary>
+///
+/// <returns>
+/// The set of all line endings present in the text file
+/// </returns>
+///
+/// <exception cref="ArgumentNullException">
+/// <paramref name="path"/> is <c>null</c>
+/// </exception>
+///
+/// <exception cref="ArgumentException">
+/// <paramref name="path"/> is empty or whitespace-only
+/// </exception>
+///
+public static ISet<LineEnding>
+DetectAllLineEndings(string path)
+{
+    Guard.Required(path, nameof(path));
+    if (!File.Exists(path)) return new HashSet<LineEnding>();
+    using (var text = File.OpenText(path)) return DetectAllLineEndings(text);
+}
+
+
+/// <summary>
+/// Detect all line endings present in a stream of text
+/// </summary>
+///
+/// <returns>
+/// The set of all line endings present in the text
+/// </returns>
+///
+/// <exception cref="ArgumentNullException">
+/// <paramref name="text"/> is <c>null</c>
+/// </exception>
+///
+public static ISet<LineEnding>
+DetectAllLineEndings(TextReader text)
+{
+    Guard.NotNull(text, nameof(text));
+
+    var endings = new HashSet<LineEnding>();
+    int lastChar = 0x0000;
+    for (;;)
+    {
+        var thisChar = text.Read();
+        if (lastChar == 0x0D && thisChar == 0x0A)
+        {
+            endings.Add(LineEnding.CRLF);
+        }
+        else if (lastChar == 0x0D)
+        {
+            endings.Add(LineEnding.CR);
+        }
+        else if (thisChar == 0x0A)
+        {
+            endings.Add(LineEnding.LF);
+        }
+        else if (thisChar == -1)
+        {
+            break;
+        }
+        lastChar = thisChar;
+    }
+
+    return endings;
 }
 
 
