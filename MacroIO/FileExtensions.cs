@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -130,6 +131,44 @@ RewriteAllLines(string path, IEnumerable<string> lines, LineEnding lineEnding, b
     using (var writer = new StreamWriter(path, false, encoding) { NewLine = lineEnding })
         foreach (var line in lines)
             writer.WriteLine(StringExtensions.NormaliseLineEndings(line, lineEnding));
+}
+
+
+/// <summary>
+/// Remove bytes from the beginning of a file
+/// </summary>
+///
+public static void
+RemoveFirst(string path, int count)
+{
+    Guard.NotNull(path, nameof(path));
+    Guard.NotWhiteSpaceOnly(path, nameof(path));
+    if (!File.Exists(path))
+    {
+        throw new ArgumentException("Specified file does not exist", nameof(path));
+    }
+    if (count < 0)
+    {
+        throw new ArgumentOutOfRangeException(nameof(count), "Negative count specified");
+    }
+
+    if (count == 0)
+    {
+        return;
+    }
+
+    using (var file = File.Open(path, FileMode.Open, FileAccess.ReadWrite))
+    using (var bytesToKeep = new MemoryStream())
+    {
+        file.Seek(count, SeekOrigin.Begin);
+        file.CopyTo(bytesToKeep);
+
+        file.Seek(0, SeekOrigin.Begin);
+        bytesToKeep.Seek(0, SeekOrigin.Begin);
+
+        file.SetLength(bytesToKeep.Length);
+        bytesToKeep.CopyTo(file);
+    }
 }
 
 
