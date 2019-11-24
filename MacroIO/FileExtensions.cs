@@ -59,6 +59,43 @@ AppendLines(string path, params string[] lines)
 
 
 /// <summary>
+/// Append lines of text to a file
+/// </summary>
+///
+/// <param name="lineEnding">
+/// Line endings to use if an existing convention cannot be found in the file
+/// </param>
+///
+/// <param name="withBom">
+/// Whether to write a UTF-8 BOM if an existing convention cannot be found in the file
+/// </param>
+///
+/// <remarks>
+/// <para>
+/// If the file already exists, its existing line ending and BOM conventions take precedence.  Otherwise, the specified
+/// <paramref name="lineEnding"/> and <paramref name="withBom"/> conventions are used.
+/// </para>
+/// </remarks>
+///
+/// <exception cref="ArgumentNullException">
+/// <paramref name="path"/> is <c>null</c>
+/// - OR -
+/// <paramref name="lines"/> is <c>null</c>
+/// </exception>
+///
+/// <exception cref="ArgumentException">
+/// <paramref name="path"/> is empty or whitespace-only
+/// </exception>
+///
+public static void
+AppendLines(string path, LineEnding lineEnding, bool withBom, params string[] lines)
+{
+    var existingLines = File.ReadAllLines(path);
+    RewriteAllLines(path, existingLines.Concat(lines), lineEnding, withBom);
+}
+
+
+/// <summary>
 /// Create or replace a text file with specified lines of text
 /// </summary>
 ///
@@ -93,6 +130,14 @@ RewriteAllLines(string path, IEnumerable<string> lines)
 /// <summary>
 /// Create or replace a text file with specified lines of text, respecting existing line ending and BOM conventions
 /// </summary>
+///
+/// <param name="lineEnding">
+/// Line endings to use if an existing convention cannot be found in the file
+/// </param>
+///
+/// <param name="withBom">
+/// Whether to write a UTF-8 BOM if an existing convention cannot be found in the file
+/// </param>
 ///
 /// <remarks>
 /// Line ending character sequences within individual <paramref name="lines"/> are normalised to be consistent with the
