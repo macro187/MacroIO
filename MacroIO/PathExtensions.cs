@@ -15,8 +15,7 @@ namespace MacroIO
         ///
         /// <remarks>
         /// <para>
-        /// Path components are split at either <see cref="Path.DirectorySeparatorChar"/> or
-        /// <see cref="Path.AltDirectorySeparatorChar"/>.
+        /// Path components are split at either <c>/</c> or <c>\</c>.
         /// </para>
         /// <para>
         /// Empty path components are discarded.  This includes those before an initial separator, after a final
@@ -32,9 +31,7 @@ namespace MacroIO
         {
             Guard.NotNull(path, nameof(path));
 
-            return path.Split(
-                new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar },
-                StringSplitOptions.RemoveEmptyEntries);
+            return path.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
         }
 
 
